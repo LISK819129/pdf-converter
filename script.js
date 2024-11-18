@@ -1,48 +1,46 @@
+// Word to PDF Conversion
 document.getElementById('convertToPDF').addEventListener('click', () => {
-    const fileInput = document.getElementById('wordInput');
-    if (!fileInput.files[0]) {
-      alert('Please select a Word file first.');
-      return;
-    }
+  const fileInput = document.getElementById('wordInput');
   
-    const reader = new FileReader();
-    reader.onload = function (event) {
-      const arrayBuffer = event.target.result;
-  
-      // Use Mammoth.js to extract clean HTML content
-      mammoth.convertToHtml({ arrayBuffer: arrayBuffer })
-        .then((result) => {
-          const pdf = new jsPDF();
-          pdf.html(result.value, {
-            callback: function (doc) {
-              doc.save('converted.pdf');
-            },
-          });
-        })
-        .catch((error) => {
-          console.error('Error converting Word to PDF:', error);
-          alert('Failed to convert Word file.');
+  // Check if a file is selected
+  if (!fileInput.files[0]) {
+    alert('Please select a Word file to convert.');
+    return;
+  }
+
+  const reader = new FileReader();
+
+  // Read the file as an array buffer
+  reader.onload = function (event) {
+    const arrayBuffer = event.target.result;
+
+    // Convert DOCX to HTML using Mammoth.js
+    mammoth.convertToHtml({ arrayBuffer: arrayBuffer })
+      .then((result) => {
+        const htmlContent = result.value; // Extracted HTML from the DOCX file
+
+        // Create a PDF using jsPDF
+        const pdf = new jsPDF();
+        pdf.html(htmlContent, {
+          callback: function (doc) {
+            doc.save('converted.pdf'); // Save the PDF file
+          },
+          x: 10,
+          y: 10,
         });
-    };
-    reader.readAsArrayBuffer(fileInput.files[0]);
-  });
-  
-  document.getElementById('convertToWord').addEventListener('click', () => {
-    const fileInput = document.getElementById('pdfInput');
-    if (!fileInput.files[0]) {
-      alert('Please select a PDF file first.');
-      return;
-    }
-  
-    const reader = new FileReader();
-    reader.onload = function (event) {
-      const pdfContent = event.target.result;
-      const blob = new Blob([pdfContent], { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
-      const link = document.createElement('a');
-      link.href = URL.createObjectURL(blob);
-      link.download = 'converted.docx';
-      link.click();
-    };
-    reader.readAsArrayBuffer(fileInput.files[0]);
-  });
+      })
+      .catch((error) => {
+        console.error('Error converting Word to PDF:', error);
+        alert('Failed to convert Word file. Ensure the file is a valid .docx.');
+      });
+  };
+
+  reader.readAsArrayBuffer(fileInput.files[0]);
+});
+
+// Disable PDF to Word Conversion
+document.getElementById('convertToWord').addEventListener('click', () => {
+  alert('PDF to Word conversion is not supported in this version. Please use external tools for this functionality.');
+});
+
   
