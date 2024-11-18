@@ -1,7 +1,6 @@
-// Word to PDF Conversion
 document.getElementById('convertToPDF').addEventListener('click', () => {
   const fileInput = document.getElementById('wordInput');
-  
+
   // Check if a file is selected
   if (!fileInput.files[0]) {
     alert('Please select a Word file to convert.');
@@ -10,20 +9,26 @@ document.getElementById('convertToPDF').addEventListener('click', () => {
 
   const reader = new FileReader();
 
-  // Read the file as an array buffer
   reader.onload = function (event) {
     const arrayBuffer = event.target.result;
 
     // Convert DOCX to HTML using Mammoth.js
     mammoth.convertToHtml({ arrayBuffer: arrayBuffer })
       .then((result) => {
-        const htmlContent = result.value; // Extracted HTML from the DOCX file
+        const htmlContent = result.value; // Extracted HTML from DOCX
 
-        // Create a PDF using jsPDF
+        // Render the HTML in a hidden container
+        const hiddenContainer = document.createElement('div');
+        hiddenContainer.innerHTML = htmlContent;
+        hiddenContainer.style.display = 'none'; // Hide it from the UI
+        document.body.appendChild(hiddenContainer);
+
+        // Create the PDF
         const pdf = new jsPDF();
-        pdf.html(htmlContent, {
+        pdf.html(hiddenContainer, {
           callback: function (doc) {
             doc.save('converted.pdf'); // Save the PDF file
+            document.body.removeChild(hiddenContainer); // Clean up
           },
           x: 10,
           y: 10,
@@ -42,5 +47,3 @@ document.getElementById('convertToPDF').addEventListener('click', () => {
 document.getElementById('convertToWord').addEventListener('click', () => {
   alert('PDF to Word conversion is not supported in this version. Please use external tools for this functionality.');
 });
-
-  
